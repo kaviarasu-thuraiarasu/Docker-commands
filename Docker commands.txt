@@ -1,0 +1,173 @@
+docker build -t kaviarasuthuraiarasu/myfirstdockerimage:V1 .   (-t its an tag)
+docker run -it kaviarasuthuraiarasu/myfirstdockerimage:V1   (-it for interactive mode) (kaviarasuthuraiarasu/myfirstdockerimage:V1=> usrname/repository:tagname)
+docker login (if this is not working use this  "docker login -u "kaviarasuthuraiarasu" -p "Littlemaster@001" docker.io")
+docker push kaviarasuthuraiarasu/myfirstdockerimage:V1
+docker search ineuron
+docker pull ineuron
+docker create   => it will create the container but wont start / run the container
+docker run 	=> it will create and start the container
+docker ps => will show only the running docker container
+docker ps -a => will show both running and stopped container
+docker run --name web1 httpd (--name web1 => giving name to container, https=> image name,
+   this will run in foreground so the window is not interactive. if we close the terminal then container will get stopped)
+docker run -d --name web2 httpd (-d will help to run in background)
+
+To Login into the Container:
+docker exec -it web2 /bin/sh ("/bin/sh"  after login where to launch, Ctrl+d for exit from container)
+if we execute without -it "docker exec web2 /bin/sh" then nothing will happen but instead
+ "docker exec web2 /bin/sh uname -a" this will help,to execute the command without entering inside.
+
+To copy file local to container and vice versa
+docker cp <Localfilepath> <containerid/containerNme(Web1):/tmp/>
+docker cp <containerid/containerNme(Web1):/tmp/> <Localfilepath or . for current direct path> 
+
+if i want to check is copied or not
+docker exec web1 ls /tmp/
+
+How to start and stop the container:
+docker stop <containerid / containername>
+docker start <containerid / containername>
+
+
+
+docker system df
+docker stats or docker stats <specific container name>
+docker system events (it will show the problem in the container)
+
+Running container cant be removed
+docker rm web1
+docker rm -f web1 (force removing, even its runnning it will get removed)
+Good approach is to stop and remove the container
+
+How to check log in Container:
+
+docker logs <containername>
+
+Alphine,Ubuntu.. are OS Container, we cant run directly, need to change the command
+docker run -d -it --name dummy3 alphine /bin/sh
+
+docker top web1 (to check what are the process running in the Web1 container)
+docker system prune (Will remove all unused container)
+
+==================
+Docker Images
+
+How to get the complete information about docker:
+docker inspect <dockerimageid with tag>
+===============
+To get the History of docker images- what nd changes done in the docker images
+docker history <dockerimageid with tag>
+===============
+To backup the docker images:
+docker save <imageid> > <Filename.tar>    (It will store in the local directory, file should always be stored as .tar)
+===============
+To load the docker image from local directory:
+
+docker load -i <Filename.tar> , now if we try docker images, we can see the image which loaded from local directory
+===============
+To remove docker images: 
+
+Running images cant be removed so we need to stop the container and remove the container of the images first
+why we want to remove container? because even we stop the container, the container still they refering the images. so thei 
+may chance to restart the container. so we need to remove the container of the image as well.
+
+docker ps
+docker stop <container name>
+docker rm <container name>
+docker rmi <image id>     (rmi => remove image)
+=====================
+From container how to create an docker images
+1. create an container
+2. login to the container (docker exec -it web2 /bin/sh)
+3. Create folder and Dummy Files
+4. Then come out from the container
+5. docker commit <containerid> customimage:2.1 (This will create an images from an modified container. To verify ,
+ we need to create and container from the new image and try login and check)
+
+Now , how to push the image to DockerHub Repo. To push to report, we need to login into the DockerHub
+
+How to rename the tag:
+
+docker tag <actual name repository:tagname> <rename details username/repository:tagname>
+
+To login other than Docker repository we have to change the command little bit
+docker login <aws...>
+==================
+Docker File:
+
+https://www.learnitguide.net/2018/06/dockerfile-explained-with-examples-of.html
+
+Instruction                    Arguments
+
+docker build .  (Run this command, where the docker file exist.)
+docker build -f /var/tmp/dockerfile (Run this command if the docker file exist in different path)
+docker builf -t username/repositoryname:tag .  (Create an image with tag..)
+
+Difference between CMD and ENTRYPOINT command:
+
+If we use CMD in the Dockerfile, while running docker run 
+docker run -d -it --name web2 -p 80:80 web:v1  (If end of the command if not used anything then it will run the CMD value from dockerfile)
+
+docker run -d -it --name web2 -p 80:80 web:v1 ping google.com (Here at the end we used ping google.com, so it will replace CMD value with ping google.com)
+
+If we use ENTRYPOINT in the Dockerfile, while running docker run
+docker run -d -it --name web2 -p 80:80 web:v1 ping google.com (Even we used ping google.com at the end, it doesnt override the ENTRYPOINT Value)
+
+
+=======================
+RUN command will work on the top of the base images
+CMD command will run in the starting of the container.
+docker run <imagename> pwd  (it will create container and return the current working directory)
+RUN adduser -d CloudChamp
+USER CloudChamp
+
+
+FROM ubuntu
+WORKDIR /app
+ENV app_host='0.0.0.0'
+
+To check the environment variable in the container
+docker run <image> env
+
+
+Using ADD instruction, i can copy the file from remote location to container and also itwill copy the unzip file and extracted in the destination location
+
+ADD https://github.com/text .  (this will copy the file from remote location to current working directory path)
+
+EXPOSE command to expose the port in the container
+
+ENTRYPOINT and CMD will create an process in the container (i.e it will start the application) and also we can keep 
+both command in the same file.
+e.g for running node js application
+
+ENTRYPOINT ['npm']
+CMD ['start']
+
+or to sleep the container for  second
+
+ENTRYPOINT ['sleep']
+CMD ['5']
+
+this 5 in the CMD is changeable
+docker run -it -p 82:80 -d web2 10 (10 is the last parameter in the command so it can replace 5 with 10)
+
+
+LABEL instruction is used to create Dockstring or command to the container 
+
+LABEL author="kaviarasu"
+======================
+PORT Hosting:
+
+docker run -p 8000:8000 -it kaviarasuthuraiarasu/myfirstdockerimage:V1
+
+
+Multistage & Distroless : Try to understand the concept
+
+
+docker volume create <kavi'Volume name'>
+
+docker volume ls
+
+docker volume inspect kavi
+
+docker daemon / Docker engine
